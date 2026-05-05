@@ -1,0 +1,4 @@
+Config,Hardware,Agents,GPU,RL_Agent
+Config A (Baseline),Single Raspberry Pi 4,1,False,False
+Config B (DMAS 3-agent),Mini-ITX Main Brain + 3× RPi 5,3,True,False
+Config C (DMAS+RL),Mini-ITX Main Brain + 4× RPi 5,4,True,True

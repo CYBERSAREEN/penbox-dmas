@@ -1,0 +1,6 @@
+Target,Total,Detected,FP,FN,Rate_%,FPR,FNR
+Metasploit 2,72,70,3,2,97.2,0.04,0.03
+Metasploit 3,124,118,4,6,95.2,0.03,0.05
+WS 2019,86,82,4,4,95.3,0.05,0.05
+IoT Device,43,42,2,1,97.7,0.05,0.02
+Overall,325,312,13,13,96.0,0.1,0.04

@@ -1,0 +1,4 @@
+Mode,Local_tokens_k,Cloud_tokens_k,Cost_USD,Offline
+Always cloud,0,500,2.5,False
+Monolithic baseline,128,0,0.0,True
+DMAS fallback,110,15,0.08,True

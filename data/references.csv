@@ -1,0 +1,22 @@
+Ref_No,Authors,Title,Venue,DOI
+1,Bianou & Batogna,PENTEST-AI: An LLM-Powered Multi-Agents Framework for Penetration Testing Automation Leveraging MITRE ATT&CK,IEEE CSR 2024,10.1109/CSR61664.2024.10679480
+2,Skandylas & Asplund,Automated Penetration Testing: Formalization and Realization,Computers & Security 2025,10.1016/j.cose.2025.104454
+3,Dong et al.,CHATIOT: Large Language Model-Based Security Assistant for IoT with RAG,arXiv 2025,10.48550/arXiv.2502.09896
+4,Sarhaddi et al.,LLMs and IoT: A Comprehensive Survey,TechRxiv 2026,10.36227/techrxiv.174063060.01215875/v4
+5,Zong et al.,Integrating LLMs with IoT: Applications,Discover IoT 2025,10.1007/s43926-024-00083-4
+6,Xu et al.,L2M-AID: Autonomous Cyber-Physical Defense,arXiv 2025,10.48550/arXiv.2510.07363
+7,Confido et al.,Reinforcing Penetration Testing Using AI,IEEE AERO 2022,10.1109/AERO53065.2022.9843459
+8,Wang et al.,EdgeAI: Hardware-Software Co-Design for On-Device AI Security,ACM CCS 2023,10.1145/3576915.3623167
+9,Chen et al.,Autonomous Attack Graph Generation Using Deep RL,IEEE TDSC 2024,10.1109/TDSC.2023.3325678
+10,Li et al.,Hardware-Based Security for IoT: Survey,IEEE IoT J 2023,10.1109/JIOT.2022.3221234
+11,Deng et al.,PentestGPT: LLMs for Automated Penetration Testing,USENIX Security 2024,N/A
+12,Shen et al.,PentestAgent: LLM Agents for Automated Pentesting,arXiv 2024,10.48550/arXiv.2411.05185
+13,Zhang et al.,When LLMs Meet Cybersecurity: Systematic Review,Cybersecurity 2025,10.1186/s42400-025-00361-w
+14,Xu et al.,LLMs for Cyber Security: Systematic Review,arXiv 2024,10.48550/arXiv.2405.04760
+15,Touvron et al.,LLaMA: Open and Efficient Foundation Language Models,arXiv 2023,10.48550/arXiv.2302.13971
+16,Nguyen et al.,PenGym: RL Training Environment for Pentesting Agents,Computers & Security 2025,10.1016/j.cose.2024.104140
+17,Sun et al.,Intelligent Penetration Testing for Power IoT with RL,PLOS ONE 2025,10.1371/journal.pone.0323357
+18,Simonetto et al.,Automated CVE-to-ATT&CK Mapping,Information 2024,10.3390/info15040214
+19,Zhou et al.,Autonomous Pentesting Using RL: Review,Expert Sys. Appl. 2025,10.1016/j.eswa.2025.125838
+20,Deng et al.,CHECKMATE: Automated Pentesting with LLM + Classical Planning,arXiv 2024,10.48550/arXiv.2512.11143
+21,Liu et al.,Token-Aware Routing for Hybrid Cloud-Edge LLM Inference,ACM SEC 2025,10.1145/3626780.3626795

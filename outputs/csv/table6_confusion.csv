@@ -1,0 +1,2 @@
+TP,FP,FN,TN,Accuracy_%,Precision_%,Recall_%,F1_Score
+312,13,13,487,96.8,96.0,96.0,0.96

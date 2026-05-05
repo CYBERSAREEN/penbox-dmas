@@ -1,0 +1,9 @@
+Parameter,Symbol,Formula,Value,Source_Equation
+Detection Probability,α_i,f(scan_signature),0.65–0.95,Eq. 5
+Network Coefficient,β,0.3 (int) / 0.7 (ext),0.3 / 0.7,Eq. 5
+False Positive Rate,FPR,FP / (FP + TN),0.10,Eq. 6
+False Negative Rate,FNR,FN / (TP + FN),0.04,Eq. 6
+LLM Skill,LLM_skill,success / total,0.8,Eq. 9
+Remediation Efficiency,η,remediated / attempted,0.7,Eq. 11
+Agent Count,N_agents,physical count,3 or 4,Eq. 17
+Fallback Trigger,λ,binary (0 or 1),conditional,Eq. 15

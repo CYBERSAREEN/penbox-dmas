@@ -1,0 +1,4 @@
+System,Recon,Exploit,Remed,Total,Latency_Reduction_%
+Baseline (Config A),340,520,180,1040,0.0
+DMAS 3-agent (Config B),95,120,45,260,75.0
+DMAS+RL (Config C),95,95,45,235,77.4

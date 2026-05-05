@@ -1,0 +1,5 @@
+Target,True_Vulns,OS
+Metasploitable 2,72,Linux
+Metasploitable 3,124,Linux/Windows
+Windows Server 2019 + AD,86,Windows
+IoT Testbed (5× ESP32 + 3× RPi Zero W),43,FreeRTOS/Linux
