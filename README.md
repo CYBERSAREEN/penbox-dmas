@@ -1,5 +1,7 @@
 # PenBox-DMAS
 
+[![verify](https://github.com/CYBERSAREEN/penbox-dmas/actions/workflows/verify.yml/badge.svg)](https://github.com/CYBERSAREEN/penbox-dmas/actions/workflows/verify.yml)
+
 Reproducibility repository for the paper *PenBox-DMAS: A Distributed Multi-Agent
 Security Appliance for Autonomous Vulnerability Assessment and Remediation at
 the Edge*.
@@ -33,7 +35,7 @@ Python numerical stack. The published values are unaffected.
 ```
 $ python3 verify.py
 ...
-28 passed, 0 failed
+30 passed, 0 failed
 ```
 
 ## What it checks
@@ -44,8 +46,21 @@ $ python3 verify.py
 | **Paper ↔ model** | Every generated macro the paper uses is defined; 16 headline values in the text are compared against `results.json` directly. |
 | **Internal consistency** | Confusion matrices close and their derived metrics recompute; recall is monotonic in worker count; speed-up never exceeds `N`; every reported probability lies in `[0,1]`; Eq. (1) satisfies `P = E·O/T`; Eq. (13) satisfies `V* = v_new/µ`; gated routing costs less than ungated. |
 | **Figures** | All included figures exist, are vector (not embedded bitmaps), carry no orphans, and every one is referenced from the text. |
+| **Layout** | Every figure sits on the page that first mentions it. Two-column floats get one page of slack, because LaTeX can only place them at a page top; single-column floats get none. |
 | **Citations** | Every `\cite` resolves, every reference is cited, and references are numbered in order of first citation as IEEE requires. |
 | **Compilation** | The paper builds in a clean temporary directory with zero errors, zero overfull boxes and zero undefined references. |
+
+Three of these are mutation-tested — deliberately broken to confirm they fail:
+deleting a macro the paper cites, replacing a cited macro with a hardcoded
+number, and forcing figures to drift from their mentions all turn the suite
+red. A check that cannot fail is not a check.
+
+The macro test does not guess which backslash-names belong to LaTeX. It
+compiles the paper once with `numbers.tex` emptied and reads the resulting
+"Undefined control sequence" errors: that error set *is* the paper's dependency
+on the model, recovered from LaTeX itself. It also means an empty `numbers.tex`
+must break the build — if the paper compiled fine without it, the numbers would
+be hardcoded, and that is a failure condition.
 
 One check exists specifically to keep the paper honest about its own weakest
 result: the random control in the chain-prediction experiment reaches **91.7 %
@@ -78,7 +93,7 @@ Needs TeX Live with `texlive-publishers` (IEEEtran) and `texlive-science`
 | Path | Role |
 |---|---|
 | `PAPER.tex` | The paper. Reads `numbers.tex` and `table_groups.tex`. |
-| `PAPER.pdf` | Built artefact, 12 pages, IEEE two-column. |
+| `PAPER.pdf` | Built artefact, 11 pages, IEEE two-column. |
 | `dmas_model.py` | The evaluation backend. Produces everything below. |
 | `verify.py` | Authenticity checks. |
 | `numbers.tex` | **Generated** — 130 `\newcommand` macros. Do not edit. |

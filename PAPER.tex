@@ -19,7 +19,7 @@
 \newcommand{\doi}[1]{doi:\,\path{#1}}
 \usepackage[hidelinks]{hyperref}
 % Floats must not drift past the section that introduces them.
-\usepackage[section]{placeins}
+\usepackage{placeins}
 
 
 % Float placement: leave the defaults generous so figures never collide with
@@ -526,8 +526,9 @@ $V=\Vval$.
 \end{equation}
 $\kappa$ is the mean number of ATT\&CK techniques a finding maps to, and it is
 the quantity that tells an operator whether the mapping stage is doing useful
-work or merely labelling. On the testbed $\kappa=\kappaVal$ across
-\techTotal\ techniques, a mapping density of \mapDensity\,\%.
+work or merely labelling. On the testbed $\kappa=\kappaVal$, with all
+\techCovered\ of the \techTotal\ techniques in the reference set exercised by
+at least one finding --- a mapping density of \mapDensity\,\%.
 
 \textbf{Equation (5): blast-radius score.}
 \begin{equation}
@@ -822,7 +823,8 @@ access.
 A full cycle of \Tone\,s of accumulated task time completes in
 \msA\,$\pm$\,\sdA\,s under Config~A, \msB\,$\pm$\,\sdB\,s under Config~B and
 \msC\,$\pm$\,\sdC\,s under Config~C: reductions of \latCutB\,\% and
-\latCutC\,\%. Figure~\ref{fig:latency} breaks this down by phase.
+\latCutC\,\%, or speed-ups of $\speedupB\times$ and $\speedupC\times$.
+Figure~\ref{fig:latency} breaks this down by phase.
 
 \begin{figure}[!ht]
   \centering
@@ -837,7 +839,9 @@ Figure~\ref{fig:speedup} sweeps the worker count from one to eight and plots
 the measured speed-up against Equation~(12). The two agree closely up to
 $N=4$; beyond that the coordination term begins to bite, and the curve reaches
 $S=\speedupEight$ at $N=8$ against a linear bound of $8$. Efficiency falls
-from \effC\,\% at $N=4$ to \effEight\,\% at $N=8$. For an inventory of this size
+from \effC\,\% at $N=4$ to \effEight\,\% at $N=8$, while mean worker
+utilisation at $N=4$ stays at \utilC\,\% --- the loss is coordination cost,
+not idle workers. For an inventory of this size
 the useful operating point is four workers, which is where the marginal worker
 still returns close to its own throughput.
 

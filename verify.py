@@ -133,29 +133,59 @@ def check_determinism():
 # 2. Every macro the paper cites is defined by the model
 # ---------------------------------------------------------------------------
 def check_macros():
-    tex = open(PAPER).read()
-    defined = set(re.findall(r"\\newcommand\{\\([A-Za-z]+)\}", open(NUMBERS).read()))
-    body = tex.split(r"\begin{document}", 1)[1]
-    used = set(re.findall(r"\\([A-Za-z]+)", body))
-    # macros that come from the model, not from LaTeX itself
-    cited = used & defined
-    missing = {m for m in used if m in defined} - defined     # empty by construction
-    # the real test: a macro used but never defined would be an undefined control
-    # sequence, so scan for model-shaped names the generator failed to emit
-    undefined = set()
-    for m in re.findall(r"\\([a-zA-Z]+)\b", body):
-        if m in defined:
-            continue
-    check("every generated macro used in the paper is defined",
-          not missing and not undefined,
-          f"missing: {sorted(missing | undefined)}" if (missing or undefined) else
-          f"{len(cited)} generated macros cited, {len(defined)} defined")
+    """Prove the paper's dependency on the generator, rather than assume it.
 
+    Compile once with numbers.tex emptied. Every macro the paper needs from the
+    model then raises "Undefined control sequence", so the error set *is* the
+    dependency set -- recovered from LaTeX itself rather than from a regex
+    guess about which backslash-names are LaTeX's own.
+
+    Two things follow, and both can actually fail:
+      - every macro the paper depends on must be emitted by the generator;
+      - the paper must genuinely depend on the generator at all (an empty
+        numbers.tex must break the build, or the numbers are hardcoded).
+    """
+    if shutil.which("pdflatex") is None:
+        check("paper's generated-macro dependencies are all satisfied", True,
+              "SKIPPED: pdflatex not installed")
+        return
+
+    defined = set(re.findall(r"\\newcommand\{\\([A-Za-z]+)\}",
+                             open(NUMBERS).read()))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        shutil.copy(PAPER, tmp)
+        shutil.copy(GROUPS_TEX, tmp)
+        shutil.copytree(FIGS, os.path.join(tmp, "figs"))
+        open(os.path.join(tmp, "numbers.tex"), "w").write("% intentionally empty\n")
+        subprocess.run(["pdflatex", "-interaction=nonstopmode", "PAPER.tex"],
+                       cwd=tmp, capture_output=True)
+        log = open(os.path.join(tmp, "PAPER.log"), errors="ignore").read()
+
+    # "! Undefined control sequence." is followed by the offending token
+    needed = set(re.findall(r"Undefined control sequence\.\s*\n[^\n]*?\\([A-Za-z]+)\s*\n",
+                            log))
+    needed |= set(re.findall(r"<recently read> \\([A-Za-z]+)", log))
+
+    check("the paper genuinely depends on the generated numbers",
+          bool(needed),
+          f"emptying numbers.tex breaks {len(needed)} macro references"
+          if needed else
+          "FAIL: the paper compiled fine without numbers.tex -- values are hardcoded")
+
+    unsatisfied = sorted(needed - defined)
+    check("every generated macro the paper depends on is emitted",
+          not unsatisfied,
+          f"used but never generated: {unsatisfied}" if unsatisfied else
+          f"{len(needed & defined)} dependencies, all satisfied")
+
+    body = open(PAPER).read().split(r"\begin{document}", 1)[1]
+    used = set(re.findall(r"\\([A-Za-z]+)", body))
     unused = sorted(defined - used)
-    check("generated macros are not silently stale", True,
-          f"{len(unused)} defined but uncited (harmless): "
-          + (", ".join(unused[:6]) + ("..." if len(unused) > 6 else "")
-             if unused else "none"))
+    check("no generated macro is stale (defined but never cited)",
+          not unused,
+          f"{len(unused)} unused: {', '.join(unused)}" if unused else
+          f"all {len(defined)} generated macros are cited")
 
 
 # ---------------------------------------------------------------------------
@@ -300,6 +330,68 @@ def check_figures():
 
 
 # ---------------------------------------------------------------------------
+# 5b. Floats land next to the text that introduces them
+# ---------------------------------------------------------------------------
+def check_float_placement():
+    """A figure that drifts pages away from its mention is a layout defect the
+    compiler will never report. Measure the distance instead of eyeballing it.
+
+    Two-column (starred) floats are allowed one page of slack: LaTeX can only
+    place them at the top of a page, so a mention halfway down page N cannot be
+    served before the top of page N+1. Single-column floats get no slack.
+    """
+    pdf = os.path.join(HERE, "PAPER.pdf")
+    aux = os.path.join(HERE, "PAPER.aux")
+    if not (os.path.exists(pdf) and os.path.exists(aux)
+            and shutil.which("pdftotext") and shutil.which("pdfinfo")):
+        check("figures appear next to the text that introduces them", True,
+              "SKIPPED: build the paper first (needs pdftotext/pdfinfo)")
+        return
+
+    tex = open(PAPER).read()
+    starred = set(re.findall(r"\\begin\{figure\*\}.*?\\label\{(fig:[^}]+)\}",
+                             tex, re.S))
+
+    num2page = {}
+    for m in re.finditer(r"\\newlabel\{(fig:[a-z]+)\}\{\{(\d+)\}\{(\d+)\}",
+                         open(aux).read()):
+        num2page[m.group(2)] = (m.group(1), int(m.group(3)))
+
+    n_pages = int(subprocess.run(["pdfinfo", pdf], capture_output=True, text=True)
+                  .stdout.split("Pages:")[1].split()[0])
+    pages = [subprocess.run(["pdftotext", "-f", str(i), "-l", str(i), pdf, "-"],
+                            capture_output=True, text=True).stdout
+             for i in range(1, n_pages + 1)]
+
+    bad, report = [], []
+    for n, (lbl, fig_page) in sorted(num2page.items(), key=lambda kv: int(kv[0])):
+        cited = None
+        for i, text in enumerate(pages, 1):
+            for line in text.splitlines():
+                if (re.search(rf"Fig(?:ure)?\.?\s*{n}\b", line)
+                        and not line.strip().startswith(f"Fig. {n}.")):
+                    cited = i
+                    break
+            if cited:
+                break
+        if cited is None:
+            continue
+        gap = abs(fig_page - cited)
+        allowed = 1 if lbl in starred else 0
+        report.append(f"Fig.{n}:{gap}")
+        if gap > allowed:
+            bad.append(f"Fig. {n} ({lbl}) on page {fig_page}, first cited on "
+                       f"page {cited} -- {gap} pages")
+
+    check("figures appear next to the text that introduces them",
+          not bad,
+          "; ".join(bad) if bad else
+          f"{len(report)} figures placed; "
+          f"{sum(1 for r in report if r.endswith(':0'))} on the exact page of "
+          f"first mention, the rest are two-column floats (top-of-page only)")
+
+
+# ---------------------------------------------------------------------------
 # 6. Citations: defined, used, and numbered in order of first appearance
 # ---------------------------------------------------------------------------
 def check_citations():
@@ -356,7 +448,8 @@ def check_compile():
 def main():
     print("PenBox-DMAS -- authenticity checks\n" + "=" * 58)
     for fn in (check_determinism, check_macros, check_paper_matches_model,
-               check_model_consistency, check_figures, check_citations,
+               check_model_consistency, check_figures,
+               check_float_placement, check_citations,
                check_compile):
         print()
         fn()
