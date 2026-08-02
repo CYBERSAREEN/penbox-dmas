@@ -6,7 +6,7 @@ Reproducibility repository for the paper *PenBox-DMAS: A Distributed Multi-Agent
 Security Appliance for Autonomous Vulnerability Assessment and Remediation at
 the Edge*.
 
-**Vedant Sareen**, Department of Computer Science and Engineering
+**Vedant Sareen** and **Himanshi Babbar**, Department of Computer Science and Engineering
 (Cybersecurity), Chitkara University, Punjab.
 
 ---

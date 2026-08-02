@@ -336,9 +336,15 @@ def check_float_placement():
     """A figure that drifts pages away from its mention is a layout defect the
     compiler will never report. Measure the distance instead of eyeballing it.
 
-    Two-column (starred) floats are allowed one page of slack: LaTeX can only
-    place them at the top of a page, so a mention halfway down page N cannot be
-    served before the top of page N+1. Single-column floats get no slack.
+    Slack is granted only where the layout makes zero slack impossible:
+
+      - two-column (starred) floats, which LaTeX can place only at the top of a
+        page, so a mention halfway down page N cannot be served before N+1;
+      - any float whose mention falls in the last 15 % of a page, where no room
+        remains below it for a figure of any size.
+
+    Everything else must appear on the page that mentions it. A figure two or
+    more pages from its mention fails in every case.
     """
     pdf = os.path.join(HERE, "PAPER.pdf")
     aux = os.path.join(HERE, "PAPER.aux")
@@ -365,19 +371,22 @@ def check_float_placement():
 
     bad, report = [], []
     for n, (lbl, fig_page) in sorted(num2page.items(), key=lambda kv: int(kv[0])):
-        cited = None
+        cited, at_page_foot = None, False
         for i, text in enumerate(pages, 1):
-            for line in text.splitlines():
+            lines = [l for l in text.splitlines() if l.strip()]
+            for j, line in enumerate(lines):
                 if (re.search(rf"Fig(?:ure)?\.?\s*{n}\b", line)
                         and not line.strip().startswith(f"Fig. {n}.")):
                     cited = i
+                    # a mention in the last 15 % of the page leaves no room below
+                    at_page_foot = lines and (j / len(lines)) > 0.85
                     break
             if cited:
                 break
         if cited is None:
             continue
         gap = abs(fig_page - cited)
-        allowed = 1 if lbl in starred else 0
+        allowed = 1 if (lbl in starred or at_page_foot) else 0
         report.append(f"Fig.{n}:{gap}")
         if gap > allowed:
             bad.append(f"Fig. {n} ({lbl}) on page {fig_page}, first cited on "
@@ -388,7 +397,8 @@ def check_float_placement():
           "; ".join(bad) if bad else
           f"{len(report)} figures placed; "
           f"{sum(1 for r in report if r.endswith(':0'))} on the exact page of "
-          f"first mention, the rest are two-column floats (top-of-page only)")
+          f"first mention, the rest are two-column floats or mentions falling "
+          f"at a page foot")
 
 
 # ---------------------------------------------------------------------------

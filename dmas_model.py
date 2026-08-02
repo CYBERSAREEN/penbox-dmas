@@ -739,13 +739,20 @@ def fig_speedup():
 
 def fig_convergence():
     NP = 22
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(WIDE, 2.2))
+    # Single column, panels stacked on a shared iteration axis: this keeps the
+    # figure placeable next to the text that cites it rather than forcing it to
+    # the top of a page as a two-column float.
+    fig, (a1, a2) = plt.subplots(2, 1, figsize=(COL, 3.30), sharex=True)
     it = range(NP)
     a1.plot(it, V_A[:NP], "o-", color=GREY[1], ms=3, lw=1.0, label="Config A")
     a1.plot(it, V_C[:NP], "s-", color="black", ms=3, lw=1.1, label="Config C")
     a1.axhline(R["VstarC"], ls=":", lw=0.9, color=GREY[2])
-    a1.annotate(r"$V^\ast=%.1f$" % R["VstarC"], (NP - 7.5, R["VstarC"] + 8), fontsize=7)
-    a1.set_xlabel("Assessment iteration $n$"); a1.set_ylabel("Active findings $V_n$")
+    # left end, below the equilibrium line: both trajectories are still high
+    # there, so the label sits in genuinely empty space
+    a1.set_ylim(bottom=-28)
+    a1.annotate(r"$V^\ast=%.1f$" % R["VstarC"], (0.5, R["VstarC"] - 22),
+                fontsize=7)
+    a1.set_ylabel("Active findings $V_n$")
     a1.legend(frameon=False); a1.grid(True); a1.set_axisbelow(True)
 
     a2.plot(it, R_A[:NP], "o-", color=GREY[1], ms=3, lw=1.0, label="Config A")

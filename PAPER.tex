@@ -56,18 +56,16 @@
 \title{PenBox-DMAS: A Distributed Multi-Agent Security Appliance for
        Autonomous Vulnerability Assessment and Remediation at the Edge}
 
-\author{%
-  \IEEEauthorblockN{Vedant Sareen}\\[2pt]
-  \IEEEauthorblockA{%
-    Department of Computer Science and Engineering (Cybersecurity)\\
-    Chitkara University, Chandigarh--Patiala National Highway (NH--64),\\
-    Village Jansla, Tehsil Rajpura, Distt.\ Patiala, Punjab 140401, India\\
-    Email: securecybernetics@gmail.com}%
-  \thanks{Manuscript prepared August 2026.}%
-}
+\author{Vedant~Sareen~and~Himanshi~Babbar%
+\thanks{V.~Sareen and H.~Babbar are with the Department of Computer Science and
+Engineering (Cybersecurity), Chitkara University Institute of Engineering and
+Technology, Chitkara University, Chandigarh--Patiala National Highway (NH--64),
+Village Jansla, Tehsil Rajpura, Distt.\ Patiala, Punjab 140401, India (e-mail:
+securecybernetics@gmail.com; himanshi.babbar@chitkara.edu.in).}%
+\thanks{Manuscript prepared August 2026.}}
 
 \markboth{Distributed Multi-Agent Security}%
-{Sareen: PenBox-DMAS --- Distributed Multi-Agent Security Appliance}
+{Sareen \MakeLowercase{and} Babbar: PenBox-DMAS --- Distributed Multi-Agent Security Appliance}
 
 \maketitle
 
@@ -990,6 +988,16 @@ iteration \convC\ against iteration \convA\ for Config~A, a \convCut\,\%
 reduction, and settles to $V^{*}=\VstarC$ against $\VstarA$. The risk score
 settles to \riskFloorC\ against \riskFloorA.
 
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\columnwidth]{fig_convergence}
+  \caption{Active findings (top) and composite risk (bottom) across
+           iterations, on a shared axis. The dotted line marks the equilibrium
+           $V^{*}$ of Equation~\eqref{eq:state}. Both configurations converge;
+           they converge to different floors, and neither floor is zero.}
+  \label{fig:conv}
+\end{figure}
+
 Neither floor is zero, and that is the result worth keeping. With
 $v_{\mathrm{new}}=\vNew$ new findings arriving per iteration and remediation
 efficacy $\eta=\etaVal$, Equation~(13) has a strictly positive fixed point.
@@ -998,16 +1006,6 @@ parallelism drives it to zero, because the arrival term does not depend on how
 many workers are running. An automated cycle converges to a residue; it does
 not eliminate one. Any deployment that treats a converged assessment as a
 clean assessment has misread what convergence means.
-
-\begin{figure*}[!t]
-  \centering
-  \includegraphics[width=\textwidth]{fig_convergence}
-  \caption{Active findings (left) and composite risk (right) across
-           iterations. The dotted line marks the equilibrium $V^{*}$ of
-           Equation~\eqref{eq:state}. Both configurations converge; they
-           converge to different floors, and neither floor is zero.}
-  \label{fig:conv}
-\end{figure*}
 
 \subsection{Comparison with Prior Systems}
 
@@ -1181,9 +1179,8 @@ is four.
 %=== ACKNOWLEDGEMENT ===========================================================
 \section*{Acknowledgement}
 
-The author thanks Dr.~Himanshi Babbar, Department of Computer Science and
-Engineering, Chitkara University, for supervision and guidance throughout this
-work.
+The authors thank the Chitkara University Institute of Engineering and
+Technology for the computing facilities used in this work.
 
 %=== REFERENCES ================================================================
 \begin{thebibliography}{99}
