@@ -52,26 +52,81 @@ def approx(a, b, tol=5e-3):
 # 1. The model runs, and running it twice gives the same answer
 # ---------------------------------------------------------------------------
 def check_determinism():
-    def digest():
-        files = ["numbers.tex", "table_groups.tex", "results.json"]
-        files += [os.path.join("figs", f) for f in sorted(os.listdir(FIGS))
-                  if f.endswith(".pdf")]
+    """Two separate claims, because they are not equally achievable.
+
+    (a) Same environment, run twice: every generated file must be identical.
+        This is what catches unseeded randomness, dict-order leakage or a
+        timestamp creeping into the output. It must hold exactly.
+
+    (b) Different machine, against what is committed: the *paper's numbers*
+        must reproduce. numbers.tex and table_groups.tex are the files the
+        paper actually reads, so those must match byte for byte.
+
+    Figure PDFs and full-precision results.json are deliberately NOT held to
+    (b). Matplotlib writes version-specific bytes, and 4000 episodes of
+    floating-point accumulation can differ in the last bits across BLAS and
+    NumPy builds. Requiring byte equality there would be claiming something
+    that is not true of any Python numerical stack.
+    """
+    def digest(files):
         return {f: hashlib.sha256(open(os.path.join(HERE, f), "rb").read()).hexdigest()
                 for f in files}
 
-    before = digest()
+    gen = ["numbers.tex", "table_groups.tex", "results.json"]
+    gen += [os.path.join("figs", f) for f in sorted(os.listdir(FIGS))
+            if f.endswith(".pdf")]
+
+    # --- (b) committed vs regenerated on this machine ----------------------
+    committed_pinned = digest(["numbers.tex", "table_groups.tex"])
+    committed_results = json.load(open(RESULTS))
+
     r = subprocess.run([sys.executable, os.path.join(HERE, "dmas_model.py")],
                        capture_output=True, text=True, cwd=HERE)
     if not check("model executes without error", r.returncode == 0,
                  r.stderr.strip()[-400:] if r.returncode else ""):
         return
-    after = digest()
-    changed = [f for f in before if before[f] != after[f]]
-    check("re-running the model reproduces byte-identical output "
+    first = digest(gen)
+
+    pinned_now = digest(["numbers.tex", "table_groups.tex"])
+    drift = [f for f in committed_pinned if committed_pinned[f] != pinned_now[f]]
+    check("the paper's numbers reproduce from the committed code",
+          not drift,
+          f"regenerated differs from committed: {drift}" if drift else
+          "numbers.tex and table_groups.tex are byte-identical to committed")
+
+    # full-precision results compared numerically, not byte-wise
+    now = json.load(open(RESULTS))
+    worst, where = 0.0, ""
+    def walk(a, b, path=""):
+        nonlocal worst, where
+        if isinstance(a, dict) and isinstance(b, dict):
+            for k in a.keys() & b.keys():
+                walk(a[k], b[k], f"{path}.{k}")
+        elif isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+            for i, (x, y) in enumerate(zip(a, b)):
+                walk(x, y, f"{path}[{i}]")
+        elif isinstance(a, (int, float)) and isinstance(b, (int, float)):
+            if not isinstance(a, bool):
+                d = abs(a - b) / max(1.0, abs(b))
+                if d > worst:
+                    worst, where = d, path
+    walk(committed_results, now)
+    check("full-precision results agree with the committed run to 1e-6",
+          worst <= 1e-6,
+          f"largest relative deviation {worst:.3e} at {where or 'n/a'} "
+          "(float accumulation differs across NumPy/BLAS builds; the paper's "
+          "rounded values are unaffected)")
+
+    # --- (a) same environment, run twice ----------------------------------
+    subprocess.run([sys.executable, os.path.join(HERE, "dmas_model.py")],
+                   capture_output=True, text=True, cwd=HERE)
+    second = digest(gen)
+    changed = [f for f in first if first[f] != second[f]]
+    check("re-running in the same environment is byte-identical "
           "(results and figures)",
           not changed,
           f"changed: {changed}" if changed else
-          f"{len(after)} generated files identical across runs")
+          f"{len(second)} generated files identical across consecutive runs")
 
 
 # ---------------------------------------------------------------------------

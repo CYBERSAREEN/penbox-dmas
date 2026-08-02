@@ -22,17 +22,25 @@ by which a stale number survives.
 `verify.py` tests that claim rather than asserting it, and CI runs it on a
 clean machine on every push.
 
+The distinction CI enforces is deliberate. `numbers.tex` — the file the paper
+actually reads — must regenerate **byte-identically on a different machine**.
+Figure PDFs and full-precision `results.json` are held to a weaker standard,
+because matplotlib writes version-specific bytes and 4000 episodes of
+floating-point accumulation can differ in the last bits across NumPy and BLAS
+builds. Claiming byte equality there would be claiming something untrue of any
+Python numerical stack. The published values are unaffected.
+
 ```
 $ python3 verify.py
 ...
-26 passed, 0 failed
+28 passed, 0 failed
 ```
 
 ## What it checks
 
 | Group | Checks |
 |---|---|
-| **Determinism** | The model runs clean, and a re-run reproduces `numbers.tex`, `table_groups.tex` and `results.json` byte for byte (seed `20260802`). |
+| **Reproducibility** | The paper's numbers regenerate byte-identically from the committed code on any machine (`numbers.tex`, `table_groups.tex`); full-precision results agree to 1e-6; a second run in the same environment is byte-identical across all 12 generated files, figures included. |
 | **Paper ↔ model** | Every generated macro the paper uses is defined; 16 headline values in the text are compared against `results.json` directly. |
 | **Internal consistency** | Confusion matrices close and their derived metrics recompute; recall is monotonic in worker count; speed-up never exceeds `N`; every reported probability lies in `[0,1]`; Eq. (1) satisfies `P = E·O/T`; Eq. (13) satisfies `V* = v_new/µ`; gated routing costs less than ungated. |
 | **Figures** | All included figures exist, are vector (not embedded bitmaps), carry no orphans, and every one is referenced from the text. |
