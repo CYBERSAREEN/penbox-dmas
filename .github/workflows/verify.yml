@@ -1,0 +1,40 @@
+# Runs the authenticity checks on every push. A green badge means the numbers
+# in the committed PDF were reproduced from the committed code on a clean
+# machine -- not on the author's laptop.
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-publishers texlive-science texlive-fonts-recommended \
+            poppler-utils
+
+      - name: Run the model and the authenticity checks
+        run: python3 verify.py
+
+      - name: Upload the rebuilt paper
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PAPER
+          path: PAPER.pdf

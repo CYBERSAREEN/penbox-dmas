@@ -1,0 +1,19 @@
+# LaTeX build products
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# The PDF is committed on purpose: it is the artefact under review.
+!PAPER.pdf
+
+__pycache__/
+*.pyc
+.venv/
