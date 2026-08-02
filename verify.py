@@ -53,8 +53,11 @@ def approx(a, b, tol=5e-3):
 # ---------------------------------------------------------------------------
 def check_determinism():
     def digest():
+        files = ["numbers.tex", "table_groups.tex", "results.json"]
+        files += [os.path.join("figs", f) for f in sorted(os.listdir(FIGS))
+                  if f.endswith(".pdf")]
         return {f: hashlib.sha256(open(os.path.join(HERE, f), "rb").read()).hexdigest()
-                for f in ("numbers.tex", "table_groups.tex", "results.json")}
+                for f in files}
 
     before = digest()
     r = subprocess.run([sys.executable, os.path.join(HERE, "dmas_model.py")],
@@ -64,8 +67,11 @@ def check_determinism():
         return
     after = digest()
     changed = [f for f in before if before[f] != after[f]]
-    check("re-running the model reproduces byte-identical output",
-          not changed, f"changed: {changed}" if changed else "")
+    check("re-running the model reproduces byte-identical output "
+          "(results and figures)",
+          not changed,
+          f"changed: {changed}" if changed else
+          f"{len(after)} generated files identical across runs")
 
 
 # ---------------------------------------------------------------------------

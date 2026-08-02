@@ -52,7 +52,12 @@ plt.rcParams.update({
     "savefig.dpi": 300,
     "savefig.bbox": "tight",
     "savefig.pad_inches": 0.02,
+    "pdf.compression": 6,
 })
+
+# Reproducible figure bytes: without a fixed CreationDate every rebuild
+# produces different files for identical plots.
+os.environ.setdefault("SOURCE_DATE_EPOCH", "1785628800")
 
 COL = 3.45          # single-column width, inches
 WIDE = 7.16         # double-column width, inches
